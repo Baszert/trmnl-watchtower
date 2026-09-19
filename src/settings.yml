@@ -38,7 +38,7 @@ custom_fields:
   help_text: April 2026 - Fixed non-maintained color library that was used.
   category: art,images
   email_address: trmnl@achtnegen.nl
-  github_url: https://github.com/Bastronautik/trmnl-watchtower
+  github_url: https://github.com/Baszert/trmnl-watchtower
 - keyname: theme
   field_type: select
   name: What do you want to look out on?
