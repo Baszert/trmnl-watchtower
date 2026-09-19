@@ -1,5 +1,11 @@
 {% assign wt_id = "wt-" | append_random %}
 {% assign theme = trmnl.plugin_settings.custom_fields_values.theme | default: 'terrain' %}
+
+{% assign full_width = trmnl.device.width %}
+{% assign full_height = trmnl.device.height %}
+{% assign half_width = trmnl.device.width | divided_by: 2 %}
+{% assign half_height = trmnl.device.height | divided_by: 2 %}
+
 <script type="module">
   if (!window.TRMNLWatchtower) {
     window.TRMNLWatchtower = class TRMNLWatchtower {
@@ -10,7 +16,7 @@
       }
 
       async init() {
-        const lib = 'https://cdn.skypack.dev/col' + 'or';
+        const lib = 'https://esm.sh/color@4.2.3';
         const { default: Clr } = await import(lib);
 
         const { width, height, offsetY, layerHeight, grid } = this.config;

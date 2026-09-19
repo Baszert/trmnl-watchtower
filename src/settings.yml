@@ -1,0 +1,52 @@
+---
+strategy: static
+no_screen_padding: 'no'
+dark_mode: 'no'
+static_data: ''
+polling_verb: get
+framework_version: 2.3.7
+serverless_language: ''
+polling_url: ''
+polling_headers: ''
+polling_body: ''
+id: 189444
+oauth_enabled: 'false'
+oauth_pkce_enabled: 'no'
+oauth_authorize_url: ''
+oauth_token_url: ''
+oauth_scopes: ''
+oauth_scope_separator: ''
+oauth_refresh_url: ''
+oauth_auth_params: ''
+oauth_token_headers: ''
+oauth_token_site: ''
+oauth_token_params: ''
+oauth_token_request_auth_method: ''
+oauth_body_format: ''
+oauth_token_response_metadata: ''
+oauth_authorization_method: ''
+oauth_refresh_params: ''
+oauth_token_field_name: ''
+oauth_expiry_field_name: ''
+oauth_expiry_strategy: ''
+oauth_fixed_expiry_ms: ''
+custom_fields:
+- name: About this plugin
+  keyname: author_bio
+  field_type: author_bio
+  description: Like you are looking out of a watchtower. You have 3 options for scenes<br/><br/>Terrain / Grey colorscheme great for TRMNL<br> Moon / See the moon and stars in the background<br>The Original / The original idea with colors<br><br> Watchtower icon created by Herra Studio @ Noun Project / All credits for the generator idea to Kevin Wang @ kwa.ng
+  help_text: April 2026 - Fixed non-maintained color library that was used.
+  category: art,images
+  email_address: trmnl@achtnegen.nl
+  github_url: https://github.com/Bastronautik/trmnl-watchtower
+- keyname: theme
+  field_type: select
+  name: What do you want to look out on?
+  description: The normal terrain, or to space?
+  options:
+  - Terrain: terrain
+  - Moon: moon
+  - The Original: og
+name: Watchtower
+description: Generated landscapes
+refresh_interval: 1440
