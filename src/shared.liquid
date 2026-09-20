@@ -1,10 +1,11 @@
 {% assign wt_id = "wt-" | append_random %}
 {% assign theme = trmnl.plugin_settings.custom_fields_values.theme | default: 'terrain' %}
 
-{% assign full_width = trmnl.device.width %}
-{% assign full_height = trmnl.device.height %}
-{% assign half_width = trmnl.device.width | divided_by: 2 %}
-{% assign half_height = trmnl.device.height | divided_by: 2 %}
+{% comment %} Fall back to OG dimensions when trmnl.device isn't available (e.g. in trmnlp) {% endcomment %}
+{% assign full_width = trmnl.device.width | default: 800 %}
+{% assign full_height = trmnl.device.height | default: 480 %}
+{% assign half_width = full_width | divided_by: 2 %}
+{% assign half_height = full_height | divided_by: 2 %}
 
 <script type="module">
   {% comment %} Small local stand-in for the "color" npm package, so nothing is fetched at render time {% endcomment %}
