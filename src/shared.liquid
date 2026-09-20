@@ -7,6 +7,65 @@
 {% assign half_height = trmnl.device.height | divided_by: 2 %}
 
 <script type="module">
+  {% comment %} Small local stand-in for the "color" npm package, so nothing is fetched at render time {% endcomment %}
+  if (!window.TRMNLColor) {
+    window.TRMNLColor = function Clr(input) {
+      const clamp = (v) => Math.min(100, Math.max(0, v));
+
+      let hsl;
+      if (Array.isArray(input)) {
+        hsl = input.slice();
+      } else {
+        const hex = String(input).replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16) / 255;
+        const g = parseInt(hex.substring(2, 4), 16) / 255;
+        const b = parseInt(hex.substring(4, 6), 16) / 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        const l = (max + min) / 2;
+        let h = 0, s = 0;
+        if (max !== min) {
+          const d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          if (max === r) h = ((g - b) / d + (g < b ? 6 : 0));
+          else if (max === g) h = (b - r) / d + 2;
+          else h = (r - g) / d + 4;
+          h *= 60;
+        }
+        hsl = [h, s * 100, l * 100];
+      }
+
+      return {
+        rotate(deg) { return Clr([((hsl[0] + deg) % 360 + 360) % 360, hsl[1], hsl[2]]); },
+        saturate(r) { return Clr([hsl[0], clamp(hsl[1] + hsl[1] * r), hsl[2]]); },
+        desaturate(r) { return Clr([hsl[0], clamp(hsl[1] - hsl[1] * r), hsl[2]]); },
+        lighten(r) { return Clr([hsl[0], hsl[1], clamp(hsl[2] + hsl[2] * r)]); },
+        darken(r) { return Clr([hsl[0], hsl[1], clamp(hsl[2] - hsl[2] * r)]); },
+        string() {
+          const h = hsl[0] / 360, s = hsl[1] / 100, l = hsl[2] / 100;
+          const hue = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+          };
+          let r, g, b;
+          if (s === 0) {
+            r = g = b = l;
+          } else {
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            r = hue(p, q, h + 1 / 3);
+            g = hue(p, q, h);
+            b = hue(p, q, h - 1 / 3);
+          }
+          return 'rgb(' + Math.round(r * 255) + ',' + Math.round(g * 255) + ',' + Math.round(b * 255) + ')';
+        }
+      };
+    };
+  }
+
   if (!window.TRMNLWatchtower) {
     window.TRMNLWatchtower = class TRMNLWatchtower {
       constructor(elementId, config) {
@@ -16,8 +75,7 @@
       }
 
       async init() {
-        const lib = 'https://esm.sh/color@4.2.3';
-        const { default: Clr } = await import(lib);
+        const Clr = window.TRMNLColor;
 
         const { width, height, offsetY, layerHeight, grid } = this.config;
         const theme = "{{ theme }}"
@@ -286,12 +344,16 @@
           const stopAttr = 'stop-' + 'color';
 
           const bgDefs = `
-                  <filter id="noise">
+                  <filter id="noise-${this.elementId}">
                       <feTurbulence type="fractalNoise" baseFrequency="30" result="noisy" />
                       <feColorMatrix type="saturate" values="0"/>
                       <feBlend in="SourceGraphic" in2="noisy" mode="multiply" />
                   </filter>
-                  <linearGradient id="fog" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <linearGradient id="fillBg-${this.elementId}" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" ${stopAttr}="${baseClr.string()}" />
+                      <stop offset="100%" ${stopAttr}="${baseClr.darken(.12).string()}" />
+                  </linearGradient>
+                  <linearGradient id="fog-${this.elementId}" x1="0%" y1="0%" x2="0%" y2="100%">
                       <stop offset="0%" ${stopAttr}="rgb(255,255,255)" stop-opacity="${(1 - (sunY * 3))}" />
                       <stop offset="100%" ${stopAttr}="rgb(255,255,255)" stop-opacity="0" />
                   </linearGradient>
@@ -303,10 +365,10 @@
                           ${bgDefs}
                           ${defs.join('')}
                       </defs>
-                      <rect filter="url(#noise)" x="0" y="0" width="100%" height="100%" fill="url(#fillBg)" />
+                      <rect filter="url(#noise-${this.elementId})" x="0" y="0" width="100%" height="100%" fill="url(#fillBg-${this.elementId})" />
                       <circle cx="${sunX * width}" cy="${sunY * height}" r="30" fill="${baseClr.rotate(180).desaturate(.8).lighten(.8).string()}" />
                       ${paths.slice(0, 3).join('')}
-                      <rect x="0" y="0" width="100%" height="100%" fill="url(#fog)" />
+                      <rect x="0" y="0" width="100%" height="100%" fill="url(#fog-${this.elementId})" />
                       ${paths.slice(3).join('')}
                   </svg>
               `;
